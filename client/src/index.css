@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Discord-inspired Dark Palette */
+  --background: 220 13% 14%;    /* #202225 */
+  --foreground: 210 20% 98%;    /* White text */
+  
+  --card: 223 7% 20%;           /* #2f3136 */
+  --card-foreground: 210 20% 98%;
+  
+  --popover: 223 7% 20%;
+  --popover-foreground: 210 20% 98%;
+  
+  --primary: 235 86% 65%;       /* #5865F2 (Blurple) */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 220 13% 18%;     /* Slightly lighter than bg */
+  --secondary-foreground: 210 20% 98%;
+  
+  --muted: 223 7% 20%;
+  --muted-foreground: 216 6% 70%; /* #b9bbbe */
+  
+  --accent: 235 86% 65%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 359 87% 59%;   /* #ED4245 */
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 216 7% 14%;
+  --input: 216 7% 14%;
+  --ring: 235 86% 65%;
+  
+  --radius: 0.5rem;
+  
+  /* Status Colors */
+  --success: 139 47% 45%;       /* #3BA55C */
+  --warning: 38 92% 50%;        /* #FAA61A */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background)); 
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--card)); 
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary)); 
+  }
+}
+
+.glass-panel {
+  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
+}
+
+.animate-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
