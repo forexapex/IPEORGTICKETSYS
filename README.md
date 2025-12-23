@@ -2,363 +2,95 @@
 
 ![IPEORG SUPPORT](./client/public/ipeorg-badge.png)
 
-A comprehensive support ticket management system for Discord servers with a full-featured dashboard, automated transcript generation, and team collaboration tools.
+IPEORG SUPPORT is a professional-grade Discord ticket management system that combines a powerful Discord bot with a real-time web dashboard. It features HTML transcripts, role-based claiming, and automated panel creation.
 
-## Features
+## 🚀 Quick Setup Guide
 
-✨ **Ticket Management**
-- Multiple ticket panels with custom categories
-- Automatic ticket channel creation
-- Ticket claiming system for staff
-- Auto-close tickets after 7 days of inactivity
+### 1. Discord Developer Portal Setup
+1. Go to [Discord Developer Portal](https://discord.com/developers/applications).
+2. **Bot Settings**:
+   - Enable **Message Content Intent**, **Server Members Intent**, and **Presence Intent**.
+   - Reset/Copy your **Bot Token**.
+3. **OAuth2 Settings**:
+   - Add this Redirect URI: `https://YOUR_REPLIT_DOMAIN/auth/callback`
+   - Copy your **Client ID** and **Client Secret**.
 
-📊 **Dashboard**
-- Real-time ticket statistics (Total, Open, Closed)
-- Manage support panels and categories
-- View ticket history and transcripts
-- Staff role permissions
+### 2. Environment Variables
+Add these secrets in Replit (or your `.env` file):
+- `DISCORD_TOKEN`: Your bot token.
+- `DISCORD_CLIENT_ID`: Your application Client ID.
+- `DISCORD_CLIENT_SECRET`: Your application Client Secret.
+- `DATABASE_URL`: Your PostgreSQL connection string (Neon recommended).
 
-📝 **Transcripts & Logging**
-- Complete message transcripts for every ticket
-- Searchable transcript history
-- Automatic XML export when tickets close
-- Send transcripts to users via DM
+### 3. Server Configuration (Important IDs)
+The system is pre-configured for **IPEORG** with these specific IDs:
+- **Staff Roles**: 8 specific roles (Admins, Moderators, etc.) have dashboard access.
+- **Auto-Pin Channel**: `1439165973708935209`
+- **Transcript Channel**: `1439166007263498352`
 
-👥 **Team Features**
-- Multi-language support ready
-- Custom support teams per panel
-- Role-based permissions
-- Staff claiming and assignment
+## 🛠️ Main Features
 
-🔧 **Easy Configuration**
-- Intuitive web dashboard
-- Custom ticket messages
-- Emoji support for panels
-- Support team role assignment
+### 💻 Web Dashboard
+- **Home Page**: Beautiful landing page showing system capabilities.
+- **Real-time Stats**: View active, closed, and pending tickets.
+- **Support Management**: Claim, close, and manage tickets directly from the web.
+- **Role-Based Access**: Only users with authorized staff roles can log in.
 
-## Installation
+### 🤖 Discord Bot
+- **Ticket Panels**: Automated "Create Ticket" buttons in designated channels.
+- **Auto-Pin**: Automatically pins new ticket channels for visibility.
+- **Transcripts**: Generates professional HTML transcripts when tickets close.
+- **Claim System**: Staff can claim tickets via buttons or the web dashboard.
 
-### Prerequisites
-- **Node.js 18+** - [Download here](https://nodejs.org)
-- **PostgreSQL Database** - [Use Replit Database](https://replit.com) or [Local PostgreSQL](https://www.postgresql.org/download/)
-- **Discord Bot Token** - [Create bot on Discord Developer Portal](https://discord.com/developers/applications)
-- **Discord Server** - For testing the bot
+## 📋 Full Process Workflow
 
-### Windows Installation
+1. **Deployment**: Ensure all environment variables are set.
+2. **Bot Invite**: Invite the bot to your server with 'Administrator' permissions.
+3. **Panel Creation**: The bot will automatically post a ticket panel in your configured channel.
+4. **User Experience**: Users click a button -> A private channel is created -> Staff is notified.
+5. **Staff Experience**: Staff can claim the ticket -> Assist the user -> Close when finished.
+6. **Archiving**: Upon closing, a transcript is saved and sent to the logs channel and the user.
 
-#### 1. Install Node.js
-1. Download from https://nodejs.org (LTS recommended)
-2. Run the installer and follow the setup wizard
-3. Check `Add to PATH` during installation
-4. Verify installation:
-   ```cmd
-   node --version
-   npm --version
+## 📁 Project Structure
+- `server/bot.ts`: Discord bot logic and event handlers.
+- `server/auth.ts`: Discord OAuth2 authentication and role checks.
+- `client/src/pages/`: Frontend pages (Dashboard, Landing, NoAccess).
+- `shared/schema.ts`: Database models for tickets, panels, and settings.
+
+---
+
+## ☁️ Hosting Instructions (Production)
+
+### 1. Prerequisites (All Platforms)
+- **Node.js**: Version 20 or higher.
+- **PostgreSQL Database**: You need a connection string (Neon, RDS, or local).
+- **Discord Bot Token**: From the Discord Developer Portal.
+
+### 2. Linux Hosting (Ubuntu/Debian - AWS EC2 or Google Cloud)
+1. **Install Node.js**:
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
    ```
-
-#### 2. Download & Setup Project
-1. Download this project as ZIP or clone with Git
-2. Extract the ZIP file to a folder (e.g., `C:\ipeorg-support`)
-3. Open Command Prompt and navigate to the folder:
-   ```cmd
-   cd C:\ipeorg-support
-   ```
-4. Install dependencies:
-   ```cmd
+2. **Clone and Install**:
+   ```bash
+   git clone <your-repo-url>
+   cd <repo-name>
    npm install
    ```
+3. **Run with PM2**:
+   ```bash
+   sudo npm install -g pm2
+   pm2 start "npm run dev" --name "ipeorg-bot"
+   pm2 save
+   pm2 startup
+   ```
 
-#### 3. Configure Discord Bot
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and name it "IPEORG SUPPORT"
-3. Go to "Bot" tab and click "Add Bot"
-4. Copy the token (keep it secret!)
-5. Go to "OAuth2" → "URL Generator"
-6. Select scopes: `bot`
-7. Select permissions:
-   - Manage Channels
-   - Manage Messages
-   - Read Messages/View Channels
-   - Send Messages
-   - Embed Links
-8. Copy the generated URL and open in browser to invite bot to your server
-
-#### 4. Setup Database
-- **Option A: Using Replit** (Easiest)
-  - Replit databases are auto-configured
-  
-- **Option B: Local PostgreSQL**
-  1. Install PostgreSQL from https://www.postgresql.org/download/windows/
-  2. Create a new database:
-     ```cmd
-     psql -U postgres
-     CREATE DATABASE ipeorg_support;
-     \q
-     ```
-  3. Create `.env` file in project root with:
-     ```
-     DATABASE_URL=postgresql://postgres:password@localhost:5432/ipeorg_support
-     DISCORD_TOKEN=your_bot_token_here
-     ```
-
-#### 5. Run the Application
-```cmd
-npm run dev
-```
-
-The application will start at `http://localhost:5000`
+### 3. Windows Hosting (AWS or Google Cloud)
+1. Install [Node.js](https://nodejs.org/) and [Git](https://git-scm.com/).
+2. `git clone <your-repo-url>` and `npm install`.
+3. Create `.env` file with secrets.
+4. `npm run dev` to start.
 
 ---
-
-### Linux Installation
-
-#### 1. Install Node.js
-```bash
-# Using apt (Ubuntu/Debian)
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify installation
-node --version
-npm --version
-```
-
-#### 2. Download & Setup Project
-```bash
-# Clone or download the project
-cd ~/projects
-wget https://your-project-url.zip
-unzip project.zip
-cd ipeorg-support
-
-# Install dependencies
-npm install
-```
-
-#### 3. Configure Discord Bot
-Same as Windows steps 1-8 above.
-
-#### 4. Setup Database
-```bash
-# Option A: PostgreSQL Local
-sudo apt-get install postgresql postgresql-contrib
-
-# Start PostgreSQL
-sudo systemctl start postgresql
-
-# Create database
-sudo -u postgres psql
-CREATE DATABASE ipeorg_support;
-CREATE USER ipeorg WITH PASSWORD 'yourpassword';
-GRANT ALL PRIVILEGES ON DATABASE ipeorg_support TO ipeorg;
-\q
-
-# Create .env file
-echo "DATABASE_URL=postgresql://ipeorg:yourpassword@localhost:5432/ipeorg_support" > .env
-echo "DISCORD_TOKEN=your_bot_token_here" >> .env
-```
-
-#### 5. Run the Application
-```bash
-npm run dev
-```
-
-Access at `http://localhost:5000`
-
----
-
-## Configuration
-
-### Environment Variables
-Create a `.env` file in the project root:
-
-```env
-# Required - Your Discord Bot Token
-DISCORD_TOKEN=your_bot_token_here
-
-# Database URL (auto-set on Replit)
-DATABASE_URL=postgresql://user:password@host:5432/database
-
-# Optional
-DISCORD_GUILD_ID=your_server_id
-TRANSCRIPT_CHANNEL_ID=channel_id_for_transcripts
-```
-
-### First Run Setup
-1. Start the application
-2. Open http://localhost:5000
-3. Go to **Settings** tab
-4. Fill in:
-   - **Guild ID**: Your Discord server ID
-   - **Category Open ID**: Channel ID for open tickets
-   - **Category Closed ID**: Channel ID for closed tickets
-   - **Transcript Channel ID**: Where to save transcripts
-   - **Staff Roles**: Comma-separated Discord role IDs
-
----
-
-## Usage
-
-### For Users (Creating Tickets)
-1. Go to your Discord server
-2. Look for ticket panels (buttons)
-3. Click a panel that matches your issue
-4. A private channel is created automatically
-5. Describe your issue
-6. Staff will respond and help resolve
-
-### For Staff (Managing Tickets)
-1. Open IPEORG SUPPORT Dashboard
-2. **Dashboard**: View ticket stats at a glance
-3. **Panels**: Create/edit support categories
-   - Title: Category name (e.g., "Bug Report")
-   - Description: Help text for users
-   - Support Team: Role to notify
-4. **Tickets**: Monitor all tickets
-   - Click to view details
-   - Assign staff member (Claim)
-   - Close when resolved
-5. **Transcripts**: View chat history
-   - Searchable
-   - Export as XML
-6. **Settings**: Configure bot behavior
-
-### Dashboard Pages
-
-#### Dashboard
-- Overview of ticket statistics
-- Quick access to recent tickets
-- Server health status
-
-#### Panels
-Create support categories:
-```
-Title: General Support
-Description: General help and questions
-Emoji: 🆘
-Support Team: @support-role
-```
-
-#### Tickets
-Real-time ticket management:
-- View open/closed tickets
-- Filter by status
-- Quick actions (claim, close, view)
-
-#### Settings
-Bot configuration:
-- Guild/Server ID
-- Channel IDs for categories
-- Staff role IDs (separate with commas)
-- Welcome message
-
-#### Transcripts
-Access ticket history:
-- Search by ticket ID or user
-- View message transcripts
-- Download as XML
-- Auto-export on close
-
----
-
-## Ticket Workflow
-
-### User Journey
-1. **User finds panel** → Clicks "Open Ticket" button
-2. **Channel created** → Private ticket channel with user + staff
-3. **Bot message** → Welcome message from bot
-4. **Discussion** → User describes issue, staff responds
-5. **Resolution** → Staff marks ticket as claimed and resolved
-6. **Closure** → Channel closes, transcript saved
-7. **Feedback** → Optional user feedback on service
-
-### Staff Journey
-1. **Notification** → Alerted when new ticket opens
-2. **Claim ticket** → Click "Claim" to take ownership
-3. **Assist user** → Discuss and resolve issue
-4. **Close ticket** → Click "Close Ticket"
-5. **Transcript** → Automatically saved and available
-6. **Review** → Check transcript and stats
-
----
-
-## Advanced Features
-
-### Auto-Close Tickets
-Tickets automatically close after 7 days with no messages.
-
-### Transcript Export
-Tickets generate XML transcripts containing:
-- All messages
-- Timestamps
-- User/Staff mentions
-- Reactions and edits
-
-### Role Permissions
-Configure which roles can:
-- View dashboard
-- Manage panels
-- Close tickets
-- Access transcripts
-
-### Custom Messages
-Set custom welcome messages for each panel:
-```
-"Hi {{user}}, our team will assist you shortly. 
-Please describe your issue in detail."
-```
-
----
-
-## Troubleshooting
-
-### Bot Not Appearing
-- Check Discord bot token in `.env`
-- Verify bot has been invited to server
-- Check bot permissions on Discord Developer Portal
-
-### Database Connection Error
-```
-Error: DATABASE_URL must be set
-```
-- Set DATABASE_URL environment variable
-- Verify PostgreSQL is running
-- Check connection string format
-
-### Port Already in Use
-```
-Error: listen EADDRINUSE :::5000
-```
-- Kill process on port 5000: `lsof -ti:5000 | xargs kill -9` (Linux)
-- Or change port in `server/index.ts`
-
-### Tickets Not Creating
-- Verify bot has "Manage Channels" permission
-- Check category IDs are correct in Settings
-- Ensure bot role is high enough in Discord
-
----
-
-## Support
-
-Need help? 
-- Check the **DOCUMENTATION.md** for detailed guides
-- Review Discord bot permissions
-- Verify all environment variables are set
-
----
-
-## License
-
-Created for IPEORG (India Premier Esports Organization)
-
----
-
-## Technical Stack
-
-- **Frontend**: React + TypeScript + Tailwind CSS
-- **Backend**: Node.js + Express
-- **Database**: PostgreSQL
-- **Discord**: discord.js v14
-- **Real-time**: WebSocket support
-- **UI**: Shadcn/ui components
+*Built for professional Discord support management by IPEORG.*

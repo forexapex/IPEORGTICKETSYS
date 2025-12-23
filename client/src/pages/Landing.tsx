@@ -4,39 +4,16 @@ import { ArrowRight, Shield, Zap, FileText, Users, ChevronDown } from "lucide-re
 export default function Landing() {
   const botInviteLink = "https://discord.com/oauth2/authorize?client_id=1451587499469176914&permissions=8&integration_type=0&scope=bot";
   
-  const handleLogin = async () => {
-    try {
-      console.log("Attempting login...");
-      const response = await fetch("/auth/callback?code=test", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      });
-      
-      console.log("Response status:", response.status);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Response data:", data);
-      
-      if (data.success) {
-        console.log("Login successful, redirecting to:", data.redirect);
-        // Small delay to ensure cookie is set
-        setTimeout(() => {
-          window.location.href = data.redirect;
-        }, 100);
-      } else {
-        alert("Login failed: " + (data.error || "Unknown error"));
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed: " + (error instanceof Error ? error.message : "Network error - make sure the server is running"));
-    }
+  const handleLogin = () => {
+    const clientId = "1451587499469176914";
+    // Using a more robust way to get the origin
+    const origin = window.location.origin;
+    const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+    const scope = encodeURIComponent("identify guilds");
+    // Ensure the URL is clean and correct
+    const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    console.log("Redirect URI being sent:", `${origin}/auth/callback`);
+    window.open(discordAuthUrl, "_blank", "width=500,height=800");
   };
 
   const scrollToFeatures = () => {

@@ -20,16 +20,47 @@ export async function registerRoutes(
         return res.status(400).json({ success: false, error: "No auth code provided" });
       }
 
-      // Mock Discord OAuth - in production use discord.js OAuth2
-      const userId = "1130709463721050142";
-      const guildId = "1439165596725022753";
-      
-      // Check if user is in admin whitelist
-      const isAdmin = isUserAdmin(userId);
+      const params = new URLSearchParams();
+      params.append('client_id', process.env.DISCORD_CLIENT_ID!);
+      params.append('client_secret', process.env.DISCORD_CLIENT_SECRET!);
+      params.append('grant_type', 'authorization_code');
+      params.append('code', code);
+      // Force HTTPS for redirect_uri in production to match Discord settings
+      const origin = process.env.NODE_ENV === 'production' 
+        ? `https://${req.get('host')}` 
+        : `${req.protocol}://${req.get('host')}`;
+      const redirectUri = `${origin}/auth/callback`;
+      params.append('redirect_uri', redirectUri);
 
+      console.log("Token exchange redirect_uri:", redirectUri);
+
+      const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        body: params,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      const tokenData = await tokenResponse.json() as any;
+      if (!tokenResponse.ok) {
+        console.error("❌ Token exchange failed:", tokenData);
+        return res.status(500).json({ success: false, error: "Token exchange failed" });
+      }
+
+      const userResponse = await fetch('https://discord.com/api/users/@me', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` }
+      });
+
+      const userData = await userResponse.json() as any;
+      if (!userResponse.ok) {
+        return res.status(500).json({ success: false, error: "Failed to fetch user data" });
+      }
+
+      const userId = userData.id;
+      const guildId = "1439165596725022753"; // Default guild ID
+      
+      const isAdmin = isUserAdmin(userId);
       const sessionId = createSession(userId, guildId, isAdmin);
       
-      // Set cookie
       res.cookie("session_id", sessionId, { 
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -40,10 +71,9 @@ export async function registerRoutes(
 
       console.log(`✅ User ${userId} authenticated as ${isAdmin ? 'admin' : 'user'}`);
       
-      // Return JSON with redirect URL
       return res.status(200).json({ 
         success: true, 
-        redirect: isAdmin ? "/admin" : "/user",
+        redirect: isAdmin ? "/admin" : "/no-access",
         isAdmin,
         sessionId
       });
@@ -92,6 +122,20 @@ export async function registerRoutes(
     const open = tickets.filter(t => t.status === 'open').length;
     const closed = tickets.filter(t => t.status === 'closed').length;
     res.json({ total, open, closed });
+  });
+
+  app.patch("/api/tickets/:id/priority", async (req, res) => {
+    try {
+      const { priority } = req.body;
+      const validPriorities = ["low", "medium", "high", "urgent"];
+      if (!validPriorities.includes(priority)) {
+        return res.status(400).json({ message: "Invalid priority level" });
+      }
+      const ticket = await storage.updateTicketPriority(Number(req.params.id), priority);
+      res.json(ticket);
+    } catch (err) {
+      res.status(400).json({ message: "Failed to update priority" });
+    }
   });
 
   // Settings

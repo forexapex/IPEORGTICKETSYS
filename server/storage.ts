@@ -17,6 +17,7 @@ export interface IStorage {
   getTickets(): Promise<typeof tickets.$inferSelect[]>;
   createTicket(ticket: InsertTicket): Promise<typeof tickets.$inferSelect>;
   updateTicketStatus(id: number, status: string): Promise<typeof tickets.$inferSelect | undefined>;
+  updateTicketPriority(id: number, priority: string): Promise<typeof tickets.$inferSelect | undefined>;
   getTicketByChannelId(channelId: string): Promise<typeof tickets.$inferSelect | undefined>;
 
   // Settings
@@ -55,6 +56,14 @@ export class DatabaseStorage implements IStorage {
   async updateTicketStatus(id: number, status: string) {
     const [updated] = await db.update(tickets)
       .set({ status, closedAt: status === 'closed' ? new Date() : undefined })
+      .where(eq(tickets.id, id))
+      .returning();
+    return updated;
+  }
+
+  async updateTicketPriority(id: number, priority: string) {
+    const [updated] = await db.update(tickets)
+      .set({ priority })
       .where(eq(tickets.id, id))
       .returning();
     return updated;

@@ -35,6 +35,7 @@ export const tickets = pgTable("tickets", {
   creatorId: text("creator_id").notNull(), // Discord User ID
   claimerId: text("claimer_id"), // Discord User ID of staff
   status: text("status").notNull().default("open"), // open, closed
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
   createdAt: timestamp("created_at").defaultNow(),
   closedAt: timestamp("closed_at"),
 });

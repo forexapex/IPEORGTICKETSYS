@@ -254,7 +254,7 @@ async function handleTicketCategorySelect(interaction: any) {
   
   // Auto-pin if this is the ticket channel
   if (channel.id === AUTO_PIN_CHANNEL_ID) {
-    await message.pin().catch(e => console.log(`Could not pin: ${e.message}`));
+    await message.pin().catch((e: Error) => console.log(`Could not pin: ${e.message}`));
     console.log(`Auto-pinned new ticket #${ticket.id}`);
   }
   
@@ -385,7 +385,7 @@ async function generateHTMLTranscript(channel: TextChannel, ticket: any): Promis
     <div class="messages">`;
 
   for (const msg of sortedMessages) {
-    if (msg.author.bot && msg.author.id !== interaction?.client?.user?.id) continue;
+    if (msg.author.bot) continue;
     
     const time = msg.createdTimestamp 
       ? new Date(msg.createdTimestamp).toLocaleTimeString()
@@ -425,9 +425,14 @@ async function generateHTMLTranscript(channel: TextChannel, ticket: any): Promis
 }
 
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
 }
 
 async function handleCloseTicket(interaction: any) {
@@ -521,6 +526,39 @@ async function handleCloseTicket(interaction: any) {
 
 async function handleClaimTicket(interaction: any) {
     const channel = interaction.channel as TextChannel;
-    await channel.send(`Ticket claimed by <@${interaction.user.id}>`);
-    // Update DB with claimer
+    const allowedRoles = [
+      '1439165889785364581',
+      '1439258461769695303',
+      '1439165890464841799',
+      '1439258100304711791',
+      '1443329127473221843',
+      '1439258760089702592',
+      '1439258799088205915',
+      '1439258937236127794'
+    ];
+
+    try {
+      const member = await interaction.guild.members.fetch(interaction.user.id);
+      const hasPermission = member.roles.cache.some((role: any) => allowedRoles.includes(role.id));
+
+      if (!hasPermission) {
+        await interaction.reply({
+          content: '❌ You do not have permission to claim tickets. Only staff members can claim support tickets.',
+          ephemeral: true
+        });
+        return;
+      }
+
+      await channel.send(`✅ Ticket claimed by <@${interaction.user.id}>`);
+      await interaction.reply({
+        content: '✅ You have claimed this ticket.',
+        ephemeral: true
+      });
+    } catch (error) {
+      console.error('Error claiming ticket:', error);
+      await interaction.reply({
+        content: '❌ An error occurred while claiming the ticket.',
+        ephemeral: true
+      });
+    }
 }
