@@ -1,0 +1,268 @@
+1. Core Coin Flip Betting System
+Game Rules
+
+Minimum bet: 5 Diamonds
+
+Maximum bet: 1000 Diamonds
+
+Diamond value:
+
+1 Diamond = base currency unit
+
+Winning logic:
+
+Winner receives 2× bet amount
+
+Loser loses the bet amount
+
+House edge: None (pure 50/50)
+
+Coin Outcomes
+
+Heads
+
+Tails
+
+Randomness must be server-side only (never client-controlled).
+
+2. Commands – Coin Flip
+/flip
+
+Description: Simple coin flip (no betting)
+
+Behavior:
+
+Bot flips a coin
+
+Displays Heads or Tails
+
+No economy impact
+
+/flip <choice> <amount>
+
+Example:
+/flip heads 50
+
+Logic:
+
+Validate amount:
+
+amount >= 5
+
+amount <= 1000
+
+Check user balance
+
+Deduct bet immediately
+
+Flip coin
+
+If user wins → add amount × 2
+
+If user loses → bet already deducted
+
+/flip <user> <choice> <amount>
+
+Example:
+/flip @Player2 tails 200
+
+PvP Logic:
+
+Both users must have sufficient balance
+
+Both bets are locked
+
+Coin is flipped once
+
+Winner receives total pot (amount × 2)
+
+Round ID is generated for verification
+
+3. Verification System
+/verify <roundID>
+
+Each round stores:
+
+{
+  "roundID": "CF-928173",
+  "player1": "UserID",
+  "player2": "UserID or null",
+  "choice": "heads",
+  "result": "tails",
+  "bet": 200,
+  "timestamp": 1700000000
+}
+
+
+Bot responds with:
+
+Coin result
+
+Winner
+
+Bet amount
+
+Timestamp
+
+Server seed hash (optional, for transparency)
+
+4. Stats System
+/stats
+
+Shows:
+
+Total flips
+
+Wins / Losses
+
+Win rate %
+
+Diamonds won
+
+Diamonds lost
+
+Biggest win
+
+Current balance
+
+/stats <user>
+
+Same stats, for another user.
+
+5. Economy System
+Currency
+
+Diamonds (💎) – main currency
+
+Rewards
+Command	Cooldown
+/daily	24h
+/weekly	7 days
+/monthly	30 days
+
+Rewards scale with level or activity.
+
+Earn Commands
+
+/work – fixed income, cooldown-based
+
+/mine – chance-based (can fail)
+
+/beg – low reward, random outcomes
+
+Gambling & Risk
+
+/bet <amount>
+
+/blackjack
+
+/casino
+
+/lottery
+
+/rob <user> (risk of fine or jail)
+
+Items & Inventory
+
+/shop
+
+/buy <item>
+
+/sell <item>
+
+/use <item>
+
+/bag
+
+/open <crate>
+
+/fish
+
+Items may:
+
+Boost luck
+
+Reduce losses
+
+Increase rewards
+
+Banking & Loans
+
+/bank
+
+/deposit
+
+/withdraw
+
+/loan
+
+Rules:
+
+Loans have interest
+
+Failure to repay → penalties
+
+User Interaction
+
+/transfer <user> <amount>
+
+/trade
+
+/wish (rare reward chance)
+
+6. Fun Commands
+
+/choose option1, option2
+
+/flip h/t
+
+Reaction-based duels
+
+Random chance events
+
+7. Leaderboards
+/fliptop <server|global>
+
+Most wins
+
+Highest profit
+
+Best win streak
+
+/gemstop <server|global>
+
+Richest users
+
+Bank balance included
+
+8. Data Model (Required)
+User Table
+{
+  "userId": "123",
+  "diamonds": 1500,
+  "bank": 5000,
+  "wins": 40,
+  "losses": 30,
+  "level": 7,
+  "exp": 2400
+}
+
+Round History
+{
+  "roundID": "CF-xxxx",
+  "players": [],
+  "bet": 100,
+  "result": "heads"
+}
+
+9. Security & Anti-Abuse
+
+Cooldowns on gambling
+
+Balance checks before every action
+
+Server-side RNG
+
+Optional seed hash for fairness
+
+Rate-limiting for /flip
